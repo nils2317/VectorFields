@@ -119,13 +119,11 @@ public class VectorField : MonoBehaviour
                 Vector3 direction = new Vector3(pt.position.y * pt.position.y * pt.position.y - 9 * pt.position.y, pt.position.x * pt.position.x * pt.position.x + 3 * pt.position.x, 1.0f);
                 pt.ApplyAcceleration(direction.normalized * speed);
             }
-
             else if (mode == Mode.WATERFALL)
             {
                 Vector3 direction = new Vector3(0, -1, 0);
                 pt.ApplyAcceleration(direction.normalized * speed);
             }
-
             else if(mode == Mode.TRUERANDOM)
             {
                 Vector3 direction = Random.insideUnitSphere;
@@ -207,7 +205,7 @@ public class VectorField : MonoBehaviour
                     else if (mode == Mode.WATERFALL)
                         direction = new Vector3(0, -1, 0);
                     else if(mode == Mode.UP)
-                        direction = new Vector3(0, 11, 0);
+                        direction = new Vector3(0, 1, 0);
                     else if (mode == Mode.OUT)
                     {
                         direction = new Vector3(x, y, 0);
