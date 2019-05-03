@@ -5,6 +5,8 @@ using UnityEditor;
 
 public class VectorField : MonoBehaviour
 {
+    public enum Mode { TRUERANDOM, CONSTANTRANDOM, TEST, WATERFALL };
+
     public Vector3Int gridSize;
     public Vector3[,,] vectorFieldDirections;
     public float cellSize;
@@ -12,8 +14,13 @@ public class VectorField : MonoBehaviour
     public GameObject particle;
     public int particleCount;
     public float particleScale;
-    public List<VectorFieldParticle> particles;
+    [Range(1f, 20f)]
+    public float speed = 1f;
+    public bool explode = false;
 
+    public Mode mode;
+
+    public List<VectorFieldParticle> particles;
     Vector3 fieldUpperBounds, fieldLowerBounds;
 
     // Start is called before the first frame update
@@ -64,9 +71,12 @@ public class VectorField : MonoBehaviour
             {
                 for (int z = 0; z < gridSize.z; ++z)
                 {
-                    Vector3 direction = new Vector3(y * y * y - 9 * y, x * x * x + 3 * x, 1.0f);
-                    //Vector3 direction = new Vector3(1f, 0f, 0f);
-                    vectorFieldDirections[x, y, z] = Vector3.Normalize(direction);
+                    if(mode == Mode.CONSTANTRANDOM)
+                    {
+                        Vector3 direction = new Vector3(y * y * y - 9 * y, x * x * x + 3 * x, 1.0f);
+                        direction = Random.insideUnitSphere;
+                        vectorFieldDirections[x, y, z] = Vector3.Normalize(direction) * speed;
+                    }
                 }
             }
         }
@@ -78,19 +88,38 @@ public class VectorField : MonoBehaviour
         foreach (VectorFieldParticle pt in particles)
         {
             // Grided Vectors
-            //Vector3Int posOnGrid = new Vector3Int(Mathf.FloorToInt(Mathf.Clamp((pt.position.x - this.transform.position.x) / cellSize, 0, gridSize.x - 1)),
-            //                                      Mathf.FloorToInt(Mathf.Clamp((pt.position.y - this.transform.position.y) / cellSize, 0, gridSize.y - 1)),
-            //                                      Mathf.FloorToInt(Mathf.Clamp((pt.position.z - this.transform.position.z) / cellSize, 0, gridSize.z - 1)));
-            //
-            //pt.ApplyAcceleration(vectorFieldDirections[posOnGrid.x, posOnGrid.y, posOnGrid.z]);
+            if(mode == Mode.CONSTANTRANDOM)
+            {
+                Vector3Int posOnGrid = new Vector3Int(Mathf.FloorToInt(Mathf.Clamp((pt.position.x - this.transform.position.x) / cellSize, 0, gridSize.x - 1)),
+                                                      Mathf.FloorToInt(Mathf.Clamp((pt.position.y - this.transform.position.y) / cellSize, 0, gridSize.y - 1)),
+                                                      Mathf.FloorToInt(Mathf.Clamp((pt.position.z - this.transform.position.z) / cellSize, 0, gridSize.z - 1)));
+            
+                pt.ApplyAcceleration(vectorFieldDirections[posOnGrid.x, posOnGrid.y, posOnGrid.z]);
+            }
 
             //float result;
             //ExpressionEvaluator.Evaluate<float>("4 + 3", out result);
             //Debug.Log(result);
 
             // Precise Vectors
-            Vector3 direction = new Vector3(pt.position.y * pt.position.y * pt.position.y - 9 * pt.position.y, pt.position.x * pt.position.x * pt.position.x + 3 * pt.position.x, 1.0f);
-            pt.ApplyAcceleration(direction.normalized);
+            else if(mode == Mode.TEST)
+            {
+                Vector3 direction = new Vector3(pt.position.y * pt.position.y * pt.position.y - 9 * pt.position.y, pt.position.x * pt.position.x * pt.position.x + 3 * pt.position.x, 1.0f);
+                pt.ApplyAcceleration(direction.normalized * speed);
+            }
+
+            else if (mode == Mode.WATERFALL)
+            {
+                Vector3 direction = new Vector3(0, -1, 0);
+                pt.ApplyAcceleration(direction.normalized * speed);
+            }
+
+            else if(mode == Mode.TRUERANDOM)
+            {
+                Vector3 direction = Random.insideUnitSphere;
+                pt.ApplyAcceleration(direction.normalized * speed);
+            }
+
 
 
             // Clear and Replace exited particles
@@ -101,11 +130,22 @@ public class VectorField : MonoBehaviour
             }
         }
 
-        foreach (VectorFieldParticle pt in toDestroy)
+        if(!explode)
         {
-            particles.Remove(pt);
-            Destroy(pt.gameObject);
-            spawnParticle();
+            foreach (VectorFieldParticle pt in toDestroy)
+            {
+                particles.Remove(pt);
+                Destroy(pt.gameObject);
+                spawnParticle();
+            }
+        }
+        else
+        {
+            foreach (VectorFieldParticle pt in toDestroy)
+            {
+                particles.Remove(pt);
+                pt.Release();
+            }
         }
 
         toDestroy.Clear();
@@ -122,8 +162,12 @@ public class VectorField : MonoBehaviour
             {
                 for (int z = 0; z < gridSize.z; ++z)
                 {
-                    float weight = (x * x) + (2.0f * y) - z;
-                    Vector3 direction = new Vector3(y * y * y - 9 * y, x * x * x + 3 * x, 1.0f);
+                    Vector3 direction = new Vector3();
+
+                    if (mode == Mode.TEST)
+                        direction = new Vector3(y * y * y - 9 * y, x * x * x + 3 * x, 1.0f);
+                    else if (mode == Mode.WATERFALL)
+                        direction = new Vector3(0, -1, 0);
 
                     Gizmos.color = new Color(direction.normalized.x, direction.normalized.y, direction.normalized.z);
                     Vector3 pos = new Vector3(x, y, z) + transform.position;

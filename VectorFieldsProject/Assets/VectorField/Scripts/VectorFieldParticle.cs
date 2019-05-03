@@ -23,10 +23,24 @@ public class VectorFieldParticle : MonoBehaviour
         position += velocity * Time.deltaTime;
 
         transform.position = position;
+        Clear();
     }
 
     public void ApplyAcceleration(Vector3 newAcceleration)
     {
         acceleration = newAcceleration;
+    }
+
+    public void Release()
+    {
+        acceleration = new Vector3(acceleration.x, -9.8f, acceleration.z);
+    }
+
+    public void Clear()
+    {
+        if(position.y < -10)
+        {
+            Destroy(this.gameObject);
+        }
     }
 }

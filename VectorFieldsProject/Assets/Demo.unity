@@ -371,5 +371,40 @@ PrefabInstance:
       propertyPath: particleScale
       value: 0.5
       objectReference: {fileID: 0}
+    - target: {fileID: 6517738106358375543, guid: fa995a0856f2e2648b1bf680327d646e,
+        type: 3}
+      propertyPath: cellSize
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6517738106358375543, guid: fa995a0856f2e2648b1bf680327d646e,
+        type: 3}
+      propertyPath: gridSize.x
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 6517738106358375543, guid: fa995a0856f2e2648b1bf680327d646e,
+        type: 3}
+      propertyPath: gridSize.y
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 6517738106358375543, guid: fa995a0856f2e2648b1bf680327d646e,
+        type: 3}
+      propertyPath: gridSize.z
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 6517738106358375543, guid: fa995a0856f2e2648b1bf680327d646e,
+        type: 3}
+      propertyPath: mode
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6517738106358375543, guid: fa995a0856f2e2648b1bf680327d646e,
+        type: 3}
+      propertyPath: explode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6517738106358375543, guid: fa995a0856f2e2648b1bf680327d646e,
+        type: 3}
+      propertyPath: speed
+      value: 10
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: fa995a0856f2e2648b1bf680327d646e, type: 3}
