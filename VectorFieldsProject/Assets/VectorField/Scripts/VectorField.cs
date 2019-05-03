@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 
 public class VectorField : MonoBehaviour
 {
@@ -63,8 +64,8 @@ public class VectorField : MonoBehaviour
             {
                 for (int z = 0; z < gridSize.z; ++z)
                 {
-                    //Vector3 direction = new Vector3(y * y * y - 9 * y, x * x * x + 3 * x, 1.0f);
-                    Vector3 direction = new Vector3(1f, 0f, 0f);
+                    Vector3 direction = new Vector3(y * y * y - 9 * y, x * x * x + 3 * x, 1.0f);
+                    //Vector3 direction = new Vector3(1f, 0f, 0f);
                     vectorFieldDirections[x, y, z] = Vector3.Normalize(direction);
                 }
             }
@@ -73,30 +74,48 @@ public class VectorField : MonoBehaviour
 
     void ParticleUpdate()
     {
+        List<VectorFieldParticle> toDestroy = new List<VectorFieldParticle>();
         foreach (VectorFieldParticle pt in particles)
         {
-            Vector3Int posOnGrid = new Vector3Int(Mathf.FloorToInt(Mathf.Clamp((pt.position.x - this.transform.position.x) / cellSize, 0, gridSize.x - 1)),
-                                                  Mathf.FloorToInt(Mathf.Clamp((pt.position.y - this.transform.position.y) / cellSize, 0, gridSize.y - 1)),
-                                                  Mathf.FloorToInt(Mathf.Clamp((pt.position.z - this.transform.position.z) / cellSize, 0, gridSize.z - 1)));
+            // Grided Vectors
+            //Vector3Int posOnGrid = new Vector3Int(Mathf.FloorToInt(Mathf.Clamp((pt.position.x - this.transform.position.x) / cellSize, 0, gridSize.x - 1)),
+            //                                      Mathf.FloorToInt(Mathf.Clamp((pt.position.y - this.transform.position.y) / cellSize, 0, gridSize.y - 1)),
+            //                                      Mathf.FloorToInt(Mathf.Clamp((pt.position.z - this.transform.position.z) / cellSize, 0, gridSize.z - 1)));
+            //
+            //pt.ApplyAcceleration(vectorFieldDirections[posOnGrid.x, posOnGrid.y, posOnGrid.z]);
 
-            pt.ApplyAcceleration(vectorFieldDirections[posOnGrid.x, posOnGrid.y, posOnGrid.z]);
+            //float result;
+            //ExpressionEvaluator.Evaluate<float>("4 + 3", out result);
+            //Debug.Log(result);
+
+            // Precise Vectors
+            Vector3 direction = new Vector3(pt.position.y * pt.position.y * pt.position.y - 9 * pt.position.y, pt.position.x * pt.position.x * pt.position.x + 3 * pt.position.x, 1.0f);
+            pt.ApplyAcceleration(direction.normalized);
+
 
             // Clear and Replace exited particles
             if (pt.position.x > fieldUpperBounds.x || pt.position.y > fieldUpperBounds.y || pt.position.z > fieldUpperBounds.z ||
                 pt.position.x < fieldLowerBounds.x || pt.position.y < fieldLowerBounds.y || pt.position.z < fieldLowerBounds.z)
             {
-                particles.Remove(pt);
-                Destroy(pt.gameObject);
-                spawnParticle();
+                toDestroy.Add(pt);
             }
         }
+
+        foreach (VectorFieldParticle pt in toDestroy)
+        {
+            particles.Remove(pt);
+            Destroy(pt.gameObject);
+            spawnParticle();
+        }
+
+        toDestroy.Clear();
     }
 
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.white;
         Gizmos.DrawWireCube(this.transform.position + new Vector3(gridSize.x, gridSize.y, gridSize.z) * 0.5f * cellSize, new Vector3(gridSize.x, gridSize.y, gridSize.z) * cellSize);
-        /*
+        
         for(int x = 0; x < gridSize.x; ++x)
         {
             for (int y = 0; y < gridSize.y; ++y)
@@ -110,10 +129,12 @@ public class VectorField : MonoBehaviour
                     Vector3 pos = new Vector3(x, y, z) + transform.position;
                     Vector3 endPos = pos + Vector3.Normalize(direction);
                     Gizmos.DrawLine(pos, endPos);
+
+                    Gizmos.DrawSphere(endPos, 0.1f);
                 }
             }
         }
-        */
+        
     }
     
 }

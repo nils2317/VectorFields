@@ -364,7 +364,7 @@ PrefabInstance:
     - target: {fileID: 6517738106358375543, guid: fa995a0856f2e2648b1bf680327d646e,
         type: 3}
       propertyPath: particleCount
-      value: 500
+      value: 1000
       objectReference: {fileID: 0}
     - target: {fileID: 6517738106358375543, guid: fa995a0856f2e2648b1bf680327d646e,
         type: 3}
